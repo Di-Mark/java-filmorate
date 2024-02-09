@@ -29,7 +29,7 @@ public class UserControllerTest {
                 .build();
         userController.createUser(user);
         user.setId(1);
-        assertEquals(user, userController.findAllUsers().get(1));
+        assertEquals(user, userController.findAllUsers().get(0));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class UserControllerTest {
         userController.createUser(user);
         user.setId(1);
         user.setName(user.getLogin());
-        assertEquals(user, userController.findAllUsers().get(1));
+        assertEquals(user, userController.findAllUsers().get(0));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class UserControllerTest {
                 .build();
         userController.createUser(user);
         userController.patchUser(user2);
-        assertEquals(user2, userController.findAllUsers().get(1));
+        assertEquals(user2, userController.findAllUsers().get(0));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class UserControllerTest {
         userController.createUser(user);
         userController.patchUser(user2);
         user2.setName(user.getLogin());
-        assertEquals(user2, userController.findAllUsers().get(1));
+        assertEquals(user2, userController.findAllUsers().get(0));
     }
 
     @Test
