@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.comporators.CustomizedHashMap;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
@@ -53,7 +52,12 @@ public class FilmService {
         }
         List<Map.Entry<Integer, Integer>> entries = new
                 ArrayList<Map.Entry<Integer, Integer>>(unsortedMap.entrySet());
-        Collections.sort(entries, new CustomizedHashMap());
+        Collections.sort(entries, new Comparator<Map.Entry<Integer, Integer>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
+                return -o1.getValue().compareTo(o2.getValue());
+            }
+        });
         Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer,
                 Integer>();
         for (Map.Entry<Integer, Integer> entry : entries) {
