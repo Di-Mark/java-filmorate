@@ -5,17 +5,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootTest
 public class FilmControllerTest {
-    FilmController filmController = new FilmController();
+
+    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
+    FilmController filmController = new FilmController(filmService);
+    UserService userService = new UserService(inMemoryUserStorage);
+    UserController userController = new UserController(userService);
 
     @Test
-    public void createFilmTest() throws ValidationException {
+    public void createFilmTest() {
         Film film = Film.builder()
                 .name("name")
                 .description("desc")
@@ -24,11 +37,12 @@ public class FilmControllerTest {
                 .build();
         filmController.createFilm(film);
         film.setId(1);
-        assertEquals(filmController.getFilms().get(1), film);
+        List<Film> mem = filmController.findAllFilms();
+        assertEquals(filmController.findAllFilms().get(0), film);
     }
 
     @Test
-    public void patchFilmTest() throws ValidationException {
+    public void patchFilmTest() {
         Film filmOne = Film.builder()
                 .name("nisi eiusmod")
                 .description("adipisicing")
@@ -44,11 +58,11 @@ public class FilmControllerTest {
                 .duration(100)
                 .build();
         filmController.patchFilm(apd);
-        assertEquals(apd, filmController.getFilms().get(1));
+        assertEquals(apd, filmController.findAllFilms().get(0));
     }
 
     @Test
-    public void findAllFilmsTest() throws ValidationException {
+    public void findAllFilmsTest() {
         Film filmOne = Film.builder()
                 .name("nisi eiusmod")
                 .description("adipisicing")
@@ -73,7 +87,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void createFilmWithEmptyNameTest() throws ValidationException {
+    public void createFilmWithEmptyNameTest() {
         Film filmOne = Film.builder()
                 .name("")
                 .description("adipisicing")
@@ -84,7 +98,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void createFilmWith200CharactersLongTest() throws ValidationException {
+    public void createFilmWith200CharactersLongTest() {
         Film filmOne = Film.builder()
                 .name("nisi eiusmod")
                 .description("adipisicingghjyuvdlgadipisicingghjyuvdlgadipisicingghjyuvdlgadipisicingghjyuvdlgadipisicingghjy" +
@@ -94,7 +108,7 @@ public class FilmControllerTest {
                 .build();
         filmController.createFilm(filmOne);
         filmOne.setId(1);
-        assertEquals(filmOne, filmController.getFilms().get(1));
+        assertEquals(filmOne, filmController.findAllFilms().get(0));
     }
 
     @Test
@@ -121,7 +135,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void createFilmWhenReleaseDateLimitTest() throws ValidationException {
+    public void createFilmWhenReleaseDateLimitTest() {
         Film filmOne = Film.builder()
                 .name("nisi eiusmod")
                 .description("adipisicing")
@@ -130,7 +144,7 @@ public class FilmControllerTest {
                 .build();
         filmController.createFilm(filmOne);
         filmOne.setId(1);
-        assertEquals(filmOne, filmController.getFilms().get(1));
+        assertEquals(filmOne, filmController.findAllFilms().get(0));
     }
 
     @Test
@@ -181,7 +195,7 @@ public class FilmControllerTest {
                 .build();
         filmController.createFilm(filmOne);
         filmController.patchFilm(filmTwo);
-        assertEquals(filmTwo, filmController.getFilms().get(1));
+        assertEquals(filmTwo, filmController.findAllFilms().get(0));
     }
 
     @Test
@@ -239,7 +253,7 @@ public class FilmControllerTest {
                 .releaseDate(LocalDate.of(1995, 12, 28))
                 .duration(100)
                 .build();
-        assertEquals(filmTwo, filmController.getFilms().get(1));
+        assertEquals(filmTwo, filmController.findAllFilms().get(0));
     }
 
     @Test
@@ -259,5 +273,31 @@ public class FilmControllerTest {
                 .duration(-1)
                 .build();
         assertThrowsExactly(ValidationException.class, () -> filmController.patchFilm(filmTwo));
+    }
+
+    @Test
+    public void likeFilmTest() {
+        Film filmOne = Film.builder()
+                .name("nisi eiusmod")
+                .description("adipisicing")
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
+                .build();
+        filmController.createFilm(filmOne);
+        Film filmTwo = Film.builder()
+                .name("nisi eiusmod")
+                .description("yuvdlgadipisicingghjyuvdlg")
+                .releaseDate(LocalDate.of(1989, 12, 27))
+                .duration(100)
+                .build();
+        filmController.createFilm(filmTwo);
+        User user = User.builder()
+                .name("name")
+                .email("mail@")
+                .login("login")
+                .birthday(LocalDate.of(2001, 12, 27))
+                .build();
+        userController.createUser(user);
+        filmController.likeFilm(2, 1);
     }
 }
