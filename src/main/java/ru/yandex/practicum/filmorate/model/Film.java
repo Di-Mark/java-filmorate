@@ -19,11 +19,11 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private Integer mpa;
-    private List<Integer> genres;
+    private Mpa mpa;
+    private List<Genre> genres;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate,
-                Integer duration, Integer mpa, List<Integer> genres) {
+                Integer duration, Mpa mpa, List<Genre> genres) {
         this.id = id;
         this.name = name;
         this.description = description;

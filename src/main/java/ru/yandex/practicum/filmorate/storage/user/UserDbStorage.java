@@ -17,7 +17,7 @@ import java.util.List;
 @Component
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private int idUser = 1;
+
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -35,41 +35,41 @@ public class UserDbStorage implements UserStorage {
         if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
         }
-        user.setId(idUser);
-        String sql = "insert into users (user_id, email, login, name, birthday) values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        idUser++;
-        log.info("Юзер успешно создан");
+        String sql = "insert into users (email, login, name, birthday) values (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        String sqlTemp = "SELECT MAX(USER_ID) AS user_id FROM USERS";
+        Integer id = jdbcTemplate.queryForObject(sqlTemp, (rs, rowNum) -> temp(rs));
+        user.setId(id);
         return user;
     }
 
     @Override
     public User patchUser(User user) {
-        User newUser = getUser(user.getId());
+        getUser(user.getId());
         if (user.getEmail() == null || !user.getEmail().contains("@") || user.getEmail().equals("")) {
             log.info("почта пользователя пустая или неправильного формата");
             throw new ValidationException("почта пользователя пустая или неправильного формата");
-        } else newUser.setEmail(user.getEmail());
+        }
 
         if (user.getLogin().equals("") || user.getLogin().contains(" ") || user.getLogin() == null) {
             log.info("Логин пользователя пустой или содержит пробелы");
             throw new ValidationException("Логин пользователя пустой или содержит пробелы");
-        } else newUser.setLogin(user.getLogin());
+        }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.info("День рождение пользователя не может быть в будущем");
             throw new ValidationException("День рождение пользователя не может быть в будущем");
-        } else newUser.setBirthday(user.getBirthday());
+        }
 
         if (user.getName() == null || user.getName().equals("")) {
-            newUser.setName(user.getLogin());
-        } else newUser.setName(user.getName());
+            user.setName(user.getLogin());
+        }
         String sql = "update users set email = ?, login = ?, name = ?, birthday = ?" +
                 "where user_id = ?";
-        jdbcTemplate.update(sql, newUser.getEmail(), newUser.getLogin(),
-                newUser.getName(), newUser.getBirthday(), newUser.getId());
+        jdbcTemplate.update(sql, user.getEmail(), user.getLogin(),
+                user.getName(), user.getBirthday(), user.getId());
         log.info("Юзер успешно обновлен");
-        return newUser;
+        return user;
     }
 
     @Override
@@ -105,5 +105,9 @@ public class UserDbStorage implements UserStorage {
             log.info("День рождение пользователя не может быть в будущем");
             throw new ValidationException("День рождение пользователя не может быть в будущем");
         }
+    }
+
+    private Integer temp(ResultSet rs) throws SQLException {
+        return rs.getInt("user_id");
     }
 }

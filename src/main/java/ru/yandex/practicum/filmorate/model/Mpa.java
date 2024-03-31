@@ -2,16 +2,19 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.enums.RatingName;
 
 @Builder
 @Data
-public class Rating {
+public class Mpa {
     private Integer id;
-    private RatingName name;
+    private String name;
 
-    public Rating(Integer id, RatingName name) {
+    public Mpa(Integer id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Mpa(Integer id) {
+        this.id = id;
     }
 }
