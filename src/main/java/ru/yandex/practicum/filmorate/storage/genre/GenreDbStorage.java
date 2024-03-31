@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class GenreDbStorage implements GenreStorage{
+public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {
@@ -24,23 +24,23 @@ public class GenreDbStorage implements GenreStorage{
     @Override
     public List<Genre> findAllGenres() {
         String sql = "select * from genres";
-        return jdbcTemplate.query(sql,(rs, rowNum) -> makeGenre(rs));
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
     }
 
     @Override
     public Genre getGenre(Integer id) {
         String sql = "select * from genres where genre_id = ?";
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, id);
-        if(sqlRowSet.next()){
+        if (sqlRowSet.next()) {
             log.info("Запрос на получению пользователя по id успешно произведен");
-            return  jdbcTemplate.queryForObject(sql,(rs, rowNum) -> makeGenre(rs),id);
-        }else {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeGenre(rs), id);
+        } else {
             log.info("Фильма с таким id не существует");
             throw new NotFoundException("Фильма с таким id не существует");
         }
     }
 
-    private Genre makeGenre(ResultSet rs) throws SQLException{
+    private Genre makeGenre(ResultSet rs) throws SQLException {
         Integer id = rs.getInt("genre_id");
         String name = rs.getString("name");
         return new Genre(id, GenreName.valueOf(name));
